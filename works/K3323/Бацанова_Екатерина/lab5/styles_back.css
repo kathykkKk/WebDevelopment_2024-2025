@@ -1,0 +1,17 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 50px;
+}
+.btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+.btn img {
+    width: 120px;
+    height: auto;
+}
+.btn:hover img {
+    opacity: 0.8;
+}

@@ -1,0 +1,31 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.image-container {
+    position: relative;
+    display: inline-block;
+}
+
+#main-image {
+    width: 100%;
+    display: block;
+}
+
+#video-container {
+    position: absolute;
+    z-index: 10;
+}
+
+#hidden-text {
+    position: absolute;
+    background: rgba(255, 142, 142, 0.8);
+    padding: 10px;
+    border: 1px solid black;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 10;
+    transform: rotate(-35deg);
+}

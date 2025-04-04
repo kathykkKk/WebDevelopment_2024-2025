@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Карта изображений</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <h1>Интерактивная карта изображения</h1>
+    
+    <div class="image-container">
+        <img id="main-image" src="data/kittens.jpg" usemap="#imgmap" alt="Карта изображения">
+    
+        <div id="video-container">
+            <div id="white-cover"></div>
+            <video id="overlay-video">
+                <source src="data/happyhappy.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <div id="hidden-text">Кот - популярное домашнее животное</div>
+    </div>
+
+    <map id="imgmap" name="imgmap">
+        <area shape="rect" coords="590,331,703,573" href="#"
+            onclick="playVideo(event, 590, 331, 703, 573)" alt="Видео">
+        <area shape="circle" coords="175,349,52" href="#" id="music-area"
+            onclick="toggleMusic(event)" alt="Музыка">
+        <audio id="background-music" src="data/meowmeow.mp3"></audio>
+        <area shape="circle" coords="213,447,54" href="#"
+            onclick="setReminder(event, 213,447,54)" alt="Напоминание">
+        <area shape="poly" coords="23,133,79,55,97,66,113,107,88,109,89,129,123,144,125,165,99,189,44,186,25,154" 
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=kathy.a.b.2004@gmail.com&su=Привет&body=Как дела?"
+            target="_blank" alt="Письмо">
+        <area shape="poly" coords="190,661,342,583,493,825,348,889,237,775" href="#"
+            onclick="startBallMovement()" alt="Рандом">
+        <area shape="circle" coords="571,1001,68" href="back.html" alt="Переключить на новую страницу" />
+        <area shape="rect" coords="8,926,170,1262" href="#"
+            onclick="toggleText(event, 8, 926, 170, 1262)" alt="Скрытый текст">
+        <area shape="rect" coords="495,58,602,289" href="#" onclick="guessNumber()" alt="Мини-игра">
+        <area shape="rect" coords="602,58,697,289" href="https://ru.wikipedia.org/wiki/Special:Random" 
+            target="_blank" alt="Википедия">
+        <area shape="rect" coords="388,1137,680,1279" target="_blank" alt="Карты" id="map-area">
+    </map>
+
+    <script src="script.js"></script>
+</body>
+</html>

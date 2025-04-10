@@ -50,7 +50,7 @@ function playVideo(event, x1, y1, x2, y2) {
 
 
 let isMusicPlaying = false;
-let audio = new Audio('meowmeow.mp3');
+let audio = new Audio('data/meowmeow.mp3');
 
 function toggleMusic(event) {
     if (event) event.preventDefault();

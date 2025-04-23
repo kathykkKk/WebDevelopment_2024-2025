@@ -1,0 +1,23 @@
+{% extends 'main/base.html' %}
+{% block title %}Главная{% endblock %}
+{% block content %}
+<section class="hero">
+    <h2>Добро пожаловать на мой Django-сайт!</h2>
+    <p>Этот сайт демонстрирует возможности веб-разработки с использованием Django.
+        Здесь вы можете узнать больше о проекте.</p>
+    <a href="{% url 'about' %}" class="btn">Узнать о разработке</a>
+    <p>А здесь вы сможете связаться со мной.</p>
+    <a href="{% url 'contact' %}" class="btn">Отправить обратную связь</a>
+</section>
+<section class="like-section">
+    <h3>Вам нравится сайт?</h3>
+    <p>Нажмите на сердечко, если вам понравился сайт!</p>
+
+    <button id="heartBtn" class="heart-button" aria-label="Поставить лайк">
+        ❤️
+    </button>
+    <div id="heartContainer"></div>
+</section>
+{% endblock %}
+
+

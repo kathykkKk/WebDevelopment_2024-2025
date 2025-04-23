@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Мой Django Сайт{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'main/css/style.css' %}">
+</head>
+<body>
+<header class="header" role="banner">
+    <div class="container header-inner">
+        <h1 class="logo" aria-label="Логотип сайта">Мой Django Сайт</h1>
+        <nav class="nav" role="navigation" aria-label="Основная навигация">
+            <a href="{% url 'home' %}">Главная</a>
+            <a href="{% url 'about' %}">О разработке</a>
+            <a href="{% url 'contact' %}">Обратная связь</a>
+        </nav>
+    </div>
+</header>
+<main class="main-content container" role="main">
+    {% block content %}
+    {% endblock %}
+</main>
+<footer class="footer" role="contentinfo">
+    <div class="container footer-inner">
+        <img src="{% static 'main/img/footer-logo.png' %}" alt="Логотип компании" class="footer-logo">
+        <p>© 2025 Мой сайт. Все права защищены.</p>
+    </div>
+</footer>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById('heartBtn');
+
+    btn.addEventListener('click', (e) => {
+        const heart = document.createElement('div');
+        heart.classList.add('flying-heart');
+        heart.innerText = '❤️';
+
+        const rect = btn.getBoundingClientRect();
+        const offsetX = (Math.random() - 0.5) * 60; // разброс по X
+        const offsetY = (Math.random() - 1) * 40;   // вверх и чуть в стороны
+
+        heart.style.left = `${rect.left + rect.width / 2 + offsetX}px`;
+        heart.style.top = `${window.scrollY + rect.top + offsetY}px`;
+
+        document.body.appendChild(heart);
+
+        setTimeout(() => heart.remove(), 1200);
+    });
+});
+</script>
+</body>
+</html>

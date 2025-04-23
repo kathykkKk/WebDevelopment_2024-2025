@@ -1,0 +1,61 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block title %}О разработке{% endblock %}
+{% block content %}
+<div class="about-page">
+
+    <section class="intro" id="about">
+        <h2>О проекте</h2>
+        <p>
+            Этот сайт разработан с использованием фреймворка <strong>Django</strong> и
+            демонстрирует современные подходы к веб-разработке на языке <strong>Python</strong>.
+            Цель проекта — создать полнофункциональный, адаптивный веб-интерфейс с удобной
+            навигацией, понятной архитектурой и возможностью масштабирования.
+        </p>
+    </section>
+    <section class="features" id="features">
+        <h3>Ключевые возможности</h3>
+        <ul>
+            <li>Многостраничная структура с общей навигацией и шапкой</li>
+            <li>Форма обратной связи с валидацией и сохранением данных</li>
+            <li>Адаптивный дизайн с лёгкими анимациями</li>
+            <li>Интеграция с Django Admin для управления содержимым</li>
+            <li>Простая расширяемость под дополнительные модули</li>
+        </ul>
+    </section>
+    <section class="tech" id="tech">
+        <h3>Используемые технологии</h3>
+        <div class="tech-list">
+            <div class="tech-item">
+                <img src="{% static 'main/img/python.jpeg' %}" alt="Python">
+                <p>Python</p>
+            </div>
+            <div class="tech-item">
+                <img src="{% static 'main/img/django.jpeg' %}" alt="Django">
+                <p>Django</p>
+            </div>
+            <div class="tech-item">
+                <img src="{% static 'main/img/html.png' %}" alt="HTML5">
+                <p>HTML5</p>
+            </div>
+            <div class="tech-item">
+                <img src="{% static 'main/img/css.jpeg' %}" alt="CSS3">
+                <p>CSS3</p>
+            </div>
+        </div>
+    </section>
+    <section class="faq" id="faq">
+        <h3>Вопросы и ответы</h3>
+        <details>
+            <summary>Как работает форма обратной связи?</summary>
+            <p>Пользователь заполняет форму, данные сохраняются в базе
+                данных и доступны через административную панель Django.</p>
+        </details>
+        <details>
+            <summary>Можно ли подключить email-уведомления?</summary>
+            <p>Да, используя встроенные инструменты Django
+                (например, EmailBackend), можно настроить отправку писем.</p>
+        </details>
+    </section>
+</div>
+{% endblock %}

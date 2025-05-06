@@ -2,6 +2,7 @@
 {% block title %}Обратная связь{% endblock %}
 {% block content %}
     <h2>Форма обратной связи</h2>
+
     {% if messages %}
         {% for message in messages %}
             <div class="message {{ message.tags }}">{{ message }}</div>
@@ -10,24 +11,30 @@
 
     <form method="post" class="contact-form">
         {% csrf_token %}
+
         <div class="form-group">
             <label for="id_name">Ваше имя</label>
             {{ form.name }}
         </div>
+
         <div class="form-group">
             <label for="id_email">Ваш email</label>
             {{ form.email }}
         </div>
+
         <div class="form-group">
             <label for="id_subject">Тема</label>
             {{ form.subject }}
         </div>
+
         <div class="form-group">
             <label for="id_message">Сообщение</label>
             {{ form.message }}
         </div>
+
         <button type="submit" class="btn-submit">Отправить</button>
     </form>
 {% endblock %}
+
 
 

@@ -1,0 +1,437 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block title %}{{ recipe.title }}{% endblock %}
+
+{% block content %}
+<h2>{{ recipe.title }}</h2>
+
+<div class="recipe-detail">
+    <div class="recipe-image-container">
+        {% if recipe.image %}
+            <img src="{{ recipe.image.url }}" alt="Изображение рецепта" class="recipe-image">
+        {% else %}
+            <img src="{% static 'main/img/food.jpg' %}" alt="Базовое изображение" class="recipe-image">
+        {% endif %}
+    </div>
+
+    <div class="recipe-info">
+        <h4>Ингредиенты:</h4>
+        {% if recipe.ingredients.all %}
+            <table class="ingredient-table">
+                <thead>
+                    <tr>
+                        <th>Наименование</th>
+                        <th>Вес (г)</th>
+                        <th>Количество</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ingredient in recipe.ingredients.all %}
+                        <tr>
+                            <td>{{ ingredient.name }}</td>
+                            <td>{{ ingredient.weight|default:"—" }}</td>
+                            <td>{{ ingredient.quantity|default:"—" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Ингредиенты не указаны.</p>
+        {% endif %}
+
+        <h4>Описание:</h4>
+        <div>{{ recipe.description|safe }}</div>
+    </div>
+</div>
+
+<div class="recipe-instructions">
+    <h3>Инструкции</h3>
+    <div class="instructions-content">{{ recipe.instructions|safe }}</div>
+</div>
+
+<div class="bottom-section">
+    <p id="likes-count">❤️ {{ recipe.total_likes }}</p>
+
+    {% if user.is_authenticated %}
+        <button class="like-button"
+                data-url="{% url 'recipe_like' recipe.id %}">
+            {% if is_liked %}💔 {% else %}❤️ {% endif %}
+        </button>
+    {% else %}
+        <p><a href="{% url 'login' %}">Войдите</a>, чтобы поставить лайк.</p>
+    {% endif %}
+
+    {% if recipe.author == user %}
+        <div class="actions">
+            <a href="{% url 'recipe_edit' recipe.pk %}">Редактировать</a> |
+            <a href="{% url 'recipe_delete' recipe.pk %}">Удалить</a>
+        </div>
+    {% endif %}
+</div>
+
+<hr>
+<h3>Комментарии</h3>
+
+{% if user.is_authenticated %}
+    <form method="post" id="comment-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Отправить</button>
+    </form>
+{% else %}
+    <p><a href="{% url 'login' %}">Войдите</a>, чтобы оставить комментарий.</p>
+{% endif %}
+
+<div class="comments">
+    {% for comment in comments %}
+        <div class="comment" data-comment-id="{{ comment.id }}">
+            <p><strong>{{ comment.user.username }}</strong>: {{ comment.text }}</p>
+            <p>
+                <button class="comment-like-button"
+                        data-url="{% url 'comment_like' comment.id %}">
+                    👍 {{ comment.total_likes }}
+                </button>
+                |
+                <a href="#" class="reply-link" data-id="{{ comment.id }}">Ответить</a>
+            </p>
+
+            <div class="replies">
+                {% for reply in comment.replies.all %}
+                    <div class="reply" data-reply-id="{{ reply.id }}">
+                        <p><strong>{{ reply.user.username }}</strong>: {{ reply.text }}</p>
+                        <p>
+                            <button class="reply-like-button"
+                                    data-url="{% url 'comment_like' reply.id %}">
+                                👍 {{ reply.total_likes }}
+                            </button>
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<a href="{% url 'recipe_list' %}" class="btn">Назад к списку</a>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const getCSRFToken = () =>
+        document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Лайк рецепта
+    document.querySelectorAll(".like-button").forEach(button => {
+        button.addEventListener("click", e => {
+            e.preventDefault();
+            const url = button.dataset.url;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                button.innerText = data.liked ? "💔" : "❤️";
+                document.getElementById("likes-count").innerText = `❤️ ${data.total_likes}`;
+            })
+            .catch(console.error);
+        });
+    });
+
+    // Лайк комментария
+    document.querySelectorAll(".comment-like-button").forEach(button => {
+        button.addEventListener("click", e => {
+            e.preventDefault();
+            const url = button.dataset.url;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                button.innerText = `👍 ${data.total_likes}`;
+            })
+            .catch(console.error);
+        });
+    });
+
+    // Лайк ответа на комментарий
+    document.querySelectorAll(".reply-like-button").forEach(button => {
+        button.addEventListener("click", e => {
+            e.preventDefault();
+            const url = button.dataset.url;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                button.innerText = `👍 ${data.total_likes}`;
+            })
+            .catch(console.error);
+        });
+    });
+
+    // Ответ на комментарий (форма не перезагружает страницу)
+    document.querySelectorAll(".reply-link").forEach(link => {
+        link.addEventListener("click", function (e) {
+            e.preventDefault();
+            const parentId = this.dataset.id;
+            const parentDiv = this.closest('.comment');
+
+            if (parentDiv.querySelector("form")) return;
+
+            const form = document.createElement("form");
+            form.method = "post";
+            form.innerHTML = `
+                <input type="hidden" name="csrfmiddlewaretoken" value="${getCSRFToken()}">
+                <textarea name="text" rows="2" placeholder="Ответить..."></textarea>
+                <input type="hidden" name="parent_id" value="${parentId}">
+                <button type="submit">Отправить</button>
+            `;
+
+            form.addEventListener("submit", function (ev) {
+                ev.preventDefault();
+                const data = new FormData(form);
+                fetch("", {
+                    method: "POST",
+                    body: data,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }).then(() => {
+                    location.reload(); // Или динамически вставить ответ без перезагрузки
+                });
+            });
+
+            parentDiv.appendChild(form);
+            this.remove();
+        });
+    });
+});
+</script>
+<style>
+/* Стиль для секции комментариев и лайков */
+.ingredient-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    display: block;
+}
+
+.ingredient-table th,
+.ingredient-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.recipe-info {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.comments {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.comment, .reply {
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.comment p, .reply p {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.comment p strong, .reply p strong {
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* Стиль для кнопки лайка комментария */
+.comment-like-button, .reply-like-button {
+    background-color: #f0f0f0; /* тот же цвет, что и фон комментария */
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.3s ease;
+}
+
+.comment-like-button:hover, .reply-like-button:hover {
+    background-color: #e3e3e3; /* немного темнее при наведении */
+}
+
+/* Стиль для кнопки ответа на комментарий */
+.reply-link {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+.reply-link:hover {
+    text-decoration: underline;
+}
+
+/* Стиль для формы ответа на комментарий */
+.comment form {
+    margin-top: 10px;
+    padding: 15px;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.comment form textarea {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    resize: vertical;
+    background-color: #ffffff;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+/* Эффект при фокусе на поле ввода */
+.comment form textarea:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Стиль кнопки отправки комментария */
+.comment form button {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 100%;
+}
+
+.comment form button:hover {
+    background-color: #218838;
+}
+
+/* Стиль для блока с лайками рецепта */
+#likes-count {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Стиль для кнопки лайка рецепта */
+.like-button {
+    background-color: #28a745;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.like-button {
+    background-color: #ffffff; /* светло-серый */
+    color: #333;
+}
+
+.like-button:hover {
+    background-color: #e0e0e0; /* средне-серый */
+}
+
+/* Стиль для раздела комментариев */
+.comment-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Стиль для футера комментария (ссылка на ответ) */
+.comment-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.comment-footer a {
+    color: #007bff;
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+.comment-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Стиль для ответов на комментарии */
+.replies {
+    margin-top: 10px;
+    margin-left: 20px;
+    background-color: #f8f8f8;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.reply {
+    background-color: #f1f1f1;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+/* Удаление ненужного текста "Text" в поле для ввода комментария */
+.comment form textarea:focus::placeholder {
+    color: transparent;
+}
+
+/* Стили для кнопок лайков на комментариях */
+.comment-like-button {
+    background-color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: black;
+    transition: background-color 0.3s ease;
+}
+
+.comment-like-button:hover {
+    background-color: #f0f0f0;
+}
+</style>
+
+
+{% endblock %}
+

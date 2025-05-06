@@ -1,0 +1,207 @@
+{% extends 'main/base.html' %}
+
+{% block title %}{{ form.instance.pk|yesno:"Редактировать рецепт,Добавить рецепт" }}{% endblock %}
+
+{% block content %}
+<h2>{{ form.instance.pk|yesno:"Редактировать рецепт,Добавить новый рецепт" }}</h2>
+{{ form.media }}
+
+<form method="POST" enctype="multipart/form-data" id="recipe-form">
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label for="id_title">Название рецепта:</label>
+        {{ form.title }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_description">Описание рецепта:</label>
+        {{ form.description }}
+    </div>
+
+    <div class="form-group">
+        <label>Время готовки:</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            {{ form.cook_time_hours }} <span>часов</span>
+            {{ form.cook_time_minutes }} <span>минут</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Ваше активное время:</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            {{ form.active_time_hours }} <span>часов</span>
+            {{ form.active_time_minutes }} <span>минут</span>
+        </div>
+    </div>
+
+    <h4>Ингредиенты:</h4>
+    {{ formset.management_form }}
+    <div id="ingredient-formset">
+        {% for ingredient_form in formset %}
+        <div class="ingredient-box">
+            {{ ingredient_form.id }}  {# скрытое поле ID обязательно при редактировании #}
+            <table>
+                <tr>
+                    <td>{{ ingredient_form.name }}</td>
+                    <td>{{ ingredient_form.weight }}</td>
+                    <td>{{ ingredient_form.quantity }}</td>
+                    <td>{{ ingredient_form.DELETE }}</td>
+                    <td><button type="button" class="delete-row btn-small">✕</button></td>
+                </tr>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" id="add-form" class="btn-add-ingredient">Добавить ингредиент</button>
+
+    <div class="form-group">
+        <label for="id_instructions">Инструкции:</label>
+        {{ form.instructions }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_image">Изображение:</label>
+        {{ form.image }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_category">Категория:</label>
+        {{ form.category }}
+    </div>
+
+    <button type="submit" class="btn-submit">Сохранить</button>
+</form>
+
+<a href="{% url 'recipe_list' %}" class="btn">Назад к списку</a>
+
+<style>
+.ingredient-box {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.ingredient-box table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ingredient-box th,
+.ingredient-box td {
+    border: 1px solid #ccc;
+    padding: 6px;
+    text-align: left;
+}
+
+.ingredient-box input {
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+}
+
+.ingredient-box input:focus {
+    outline: none;
+    border-color: #007BFF;
+}
+
+.ingredient-box td {
+    vertical-align: middle;
+}
+
+.btn-add-ingredient {
+    background-color: #4CAF50;
+    color: white;
+    padding: 7px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-add-ingredient:hover {
+    background-color: #45a049;
+}
+
+.btn-submit {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-small {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-small:hover {
+    background-color: #c0392b;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const formsetDiv = document.getElementById("ingredient-formset");
+    const addBtn = document.getElementById("add-form");
+    const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+
+    function createIngredientForm(index) {
+        return `
+        <div class="ingredient-box">
+            <input type="hidden" name="form-${index}-id" id="id_form-${index}-id">
+            <table>
+                <tr>
+                    <td><input type="text" name="form-${index}-name" id="id_form-${index}-name" placeholder="Наименование"></td>
+                    <td><input type="text" name="form-${index}-weight" id="id_form-${index}-weight" placeholder="Вес (г)"></td>
+                    <td><input type="text" name="form-${index}-quantity" id="id_form-${index}-quantity" placeholder="Количество"></td>
+                    <td><input type="checkbox" name="form-${index}-DELETE" id="id_form-${index}-DELETE"></td>
+                    <td><button type="button" class="delete-row btn-small">✕</button></td>
+                </tr>
+            </table>
+        </div>`;
+    }
+
+    addBtn.addEventListener("click", function () {
+        let formCount = parseInt(totalForms.value);
+        const newFormHTML = createIngredientForm(formCount);
+        formsetDiv.insertAdjacentHTML("beforeend", newFormHTML);
+        totalForms.value = formCount + 1;
+    });
+
+    formsetDiv.addEventListener("click", function (e) {
+        if (e.target.classList.contains("delete-row")) {
+            const box = e.target.closest(".ingredient-box");
+            box.remove();
+
+            // Пересчет и переименование
+            const boxes = document.querySelectorAll(".ingredient-box");
+            totalForms.value = boxes.length;
+            boxes.forEach((box, index) => {
+                box.querySelectorAll("input, select, textarea").forEach(input => {
+                    if (input.name) {
+                        input.name = input.name.replace(/form-\d+/, `form-${index}`);
+                    }
+                    if (input.id) {
+                        input.id = input.id.replace(/form-\d+/, `form-${index}`);
+                    }
+                });
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

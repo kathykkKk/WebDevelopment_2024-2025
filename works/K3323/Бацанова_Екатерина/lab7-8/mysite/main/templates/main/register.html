@@ -1,0 +1,41 @@
+{% extends 'main/base.html' %}
+{% block title %}Регистрация{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+    <h2 class="auth-title">Регистрация</h2>
+
+    {% if form.non_field_errors %}
+        <div class="auth-error">
+            {% for error in form.non_field_errors %}
+                {{ error }}<br>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <p>
+                <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span style="color:red;">*</span>{% endif %}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <span class="field-error">
+                        {% for error in field.errors %}
+                            {{ error }}<br>
+                        {% endfor %}
+                    </span>
+                {% endif %}
+            </p>
+        {% endfor %}
+
+        <button type="submit" class="auth-btn">Зарегистрироваться</button>
+    </form>
+
+    <div class="auth-switch">
+        <a href="{% url 'login' %}">Уже есть аккаунт? Войти</a>
+    </div>
+</div>
+{% endblock %}
+
+

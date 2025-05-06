@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-o&!*#42nkpkoc=w)ke7=c!_ieu78m9ekh6ql8h-o8nmfx-g5o@"
+SECRET_KEY = "django-insecure-+pk)!sxxe-aurz7%3b2*-07g-1=7fw=a7l*447s6$c664)^8s+"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,7 +38,34 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "main",
+    "django_ckeditor_5",
 ]
+
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        'block_toolbar': [
+            "heading", "|",
+            "bold", "italic", "link", "bulletedList", "numberedList", "|",
+            "insertImage", "insertTable", "mediaEmbed", "|",
+            "undo", "redo"
+        ],
+        'toolbar': [
+            "heading", "|",
+            "bold", "italic", "link", "bulletedList", "numberedList", "|",
+            "insertImage", "insertTable", "mediaEmbed", "|",
+            "undo", "redo"
+        ],
+        'image': {
+            'toolbar': ["imageTextAlternative", "|", "imageStyle:alignLeft", "imageStyle:alignCenter", "imageStyle:alignRight", "|", "resizeImage"]
+        },
+        'table': {
+            'contentToolbar': ["tableColumn", "tableRow", "mergeTableCells"]
+        },
+        'height': '400px',
+        'width': '100%',
+        'language': 'ru'
+    }
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -51,6 +78,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "mysite.urls"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 TEMPLATES = [
     {
